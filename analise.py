@@ -8,14 +8,12 @@ sns.set_theme(style="whitegrid", palette="viridis")
 
 try:
     df_2024 = pd.read_csv(FILE_2024)
-    print(f"Arquivo '{FILE_2024}' carregado com sucesso.")
 except FileNotFoundError:
     print(f"ERRO: Arquivo '{FILE_2024}' não encontrado. Verifique o caminho e o nome do arquivo.")
     exit()
 
 try:
     df_2025 = pd.read_csv(FILE_2025)
-    print(f"Arquivo '{FILE_2025}' carregado com sucesso.")
 except FileNotFoundError:
     print(f"ERRO: Arquivo '{FILE_2025}' não encontrado. Verifique o caminho e o nome do arquivo.")
     exit()
@@ -23,6 +21,25 @@ except FileNotFoundError:
 # Converter a coluna 'Position' para um formato numérico
 df_2024['Position_numeric'] = pd.to_numeric(df_2024['Position'], errors='coerce')
 df_2025['Position_numeric'] = pd.to_numeric(df_2025['Position'], errors='coerce')
+
+#Estatíticas
+print("\n--- Estatísticas descritivas de 2024 ---\n")
+
+estatisticas = df_2024.describe()
+print(estatisticas)
+print("\nDesvio Padrão\n")
+desvio_padrao = df_2024.std(numeric_only=True)
+print(desvio_padrao)
+print("-----------------------------------------------------\n")
+
+print("\n--- Estatísticas descritivas de 2025 ---\n")
+
+estatisticas = df_2025.describe()
+print(estatisticas)
+print("\nDesvio Padrão\n")
+desvio_padrao = df_2025.std(numeric_only=True)
+print(desvio_padrao)
+print("-----------------------------------------------------\n")
 
 # Equipes com mais vitórias
 plt.figure(figsize=(12, 7))
@@ -118,8 +135,7 @@ plt.savefig('distribuicao_pontos_equipe_2025.png')
 plt.clf()
 
 # Heatmap de correlação entre valores numéricos
-cols_num = ['Starting Grid', 'Laps', 'Points', 'Position_numeric', 'Total Points', 'Total Position']
-matriz_corr = df_2024[cols_num].corr()
+matriz_corr = df_2024.corr(numeric_only=True)
 
 plt.figure(figsize=(10, 8))
 sns.heatmap(matriz_corr, annot=True, cmap='coolwarm', fmt=".2f")
@@ -128,8 +144,7 @@ plt.tight_layout()
 plt.savefig('correlacao_features_2024.png')
 plt.clf()
 
-cols_num = ['Starting Grid', 'Laps', 'Points', 'Position_numeric', 'Total Points', 'Total Position']
-matriz_corr = df_2025[cols_num].corr()
+matriz_corr = df_2025.corr(numeric_only=True)
 
 plt.figure(figsize=(10, 8))
 sns.heatmap(matriz_corr, annot=True, cmap='coolwarm', fmt=".2f")
