@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     val_scores_sgd = cross_validation(CustomSGD, config.LEARNING_RATE_SGD)
     print(f"\nResultado da Validação Cruzada para SGD (MSE): {np.mean(val_scores_sgd):.4f} (+/- {np.std(val_scores_sgd):.4f})")
-    val_scores_adam = cross_validation(CustomSGD, config.LEARNING_RATE_SGD)
+    val_scores_adam = cross_validation(CustomAdam, config.LEARNING_RATE_ADAM)
     print(f"\nResultado da Validação Cruzada para Adam (MSE): {np.mean(val_scores_adam):.4f} (+/- {np.std(val_scores_adam):.4f})")
 
     full_dataset_2024 = F1Dataset(X_2024, y_2024)
@@ -94,4 +94,5 @@ if __name__ == '__main__':
     
     #Escolhe melhor otimizador com base no MSE das validações (esperado que Adam seja melhor)
     final_optimizer = CustomAdam(final_model.parameters(), lr=config.LEARNING_RATE_ADAM) if val_scores_adam < val_scores_sgd else CustomSGD(final_model.parameters(), lr=config.LEARNING_RATE_SGD)
+
     final_model = train(final_model, final_optimizer, full_train_loader, loss_fn, device)
