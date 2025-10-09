@@ -13,6 +13,7 @@ from dataset import create_sequences, F1Dataset
 from model import F1_LSTM
 from optimizers import CustomAdam, CustomSGD
 
+#Realiza validação cruzada temporal, para evitar vazamento de dados.
 def cross_validation(optimizer, lr):
     val_scores = []
 
@@ -37,6 +38,7 @@ def cross_validation(optimizer, lr):
         val_scores.append(best_fold_loss)
     return val_scores
 
+#Treina o modelo no contexto da validação cruzada, verificando as perdas para cada otimizador.
 def train_with_validation(model, optimizer, train_loader, val_loader, loss_fn, device, fold_num):
     best_val_loss = float('inf')
     patience_counter = 0
@@ -59,6 +61,7 @@ def train_with_validation(model, optimizer, train_loader, val_loader, loss_fn, d
             
     return best_val_loss
 
+#Treina o modelo em todos os dados com o melhor otimizador encontrado na validação.
 def train(model, optimizer, full_train_loader, loss_fn, device):
     print("\nIniciando treinamento final em todos os dados de 2024...")
     for epoch in range(config.EPOCHS):
@@ -96,3 +99,4 @@ if __name__ == '__main__':
     final_optimizer = CustomAdam(final_model.parameters(), lr=config.LEARNING_RATE_ADAM) if val_scores_adam < val_scores_sgd else CustomSGD(final_model.parameters(), lr=config.LEARNING_RATE_SGD)
 
     final_model = train(final_model, final_optimizer, full_train_loader, loss_fn, device)
+
