@@ -105,14 +105,16 @@ def predict_future_races(n_races_to_predict: int):
         with torch.no_grad():
             X_pred_tensor = torch.from_numpy(X_pred).float().to(device)
             output = model(X_pred_tensor).cpu().numpy().flatten()
+
+        noise = np.random.normal(0, 0.25, len(output))
         
-        sequence_predictions = pd.DataFrame({'Driver ID': driver_ids_per_sequence.values, 'Predicted Points': output})
+        sequence_predictions = pd.DataFrame({'Driver ID': driver_ids_per_sequence.values, 'Predicted Points': output+noise})
         final_predictions = sequence_predictions.groupby('Driver ID').last()
 
         predictions_df = final_predictions.sort_values('Predicted Points', ascending=False).reset_index()
         predictions_df['Position'] = range(1, len(predictions_df) + 1)
         predictions_df['Points'] = predictions_df['Position'].map(points_map).fillna(0)
-        predictions_df['Starting Grid'] = predictions_df['Position']
+        predictions_df['Starting Grid'] = np.random.permutation(range(1, len(predictions_df) + 1))
 
         current_season_unscaled_df, current_season_df = create_and_append_race_results(
             predictions_df,

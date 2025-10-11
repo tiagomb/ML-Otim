@@ -13,6 +13,7 @@ def preprocess(df_train, df_predict):
     df_train['RaceID'] = pd.factorize(df_train['Track'])[0]
 
     full_df = pd.concat([df_train, df_predict], ignore_index=True)
+    full_df = full_df[full_df['Driver'] != 'Jack Doohan'].reset_index(drop=True)
     full_df['RaceID'] = pd.factorize(full_df['Season'].astype(str) + '-' + full_df['Track'])[0]
     full_df.sort_values('RaceID', inplace=True)
 
@@ -24,7 +25,10 @@ def preprocess(df_train, df_predict):
     full_df = pd.merge(full_df, team_race_points[['RaceID', 'Team', 'Team Total Points']], on=['RaceID', 'Team'], how='left')
     full_df['Driver Contribution'] = np.where(full_df['Team Total Points'] > 0, full_df['Total Points'] / full_df['Team Total Points'], 0)
     full_df['Position'] = pd.to_numeric(full_df['Position'], errors='coerce').fillna(21)
-    full_df = pd.get_dummies(full_df, columns=config.CATEGORICAL_FEATURES, drop_first=True)
+
+    df_predict_unscaled = full_df[full_df['Season'] == 2025].copy()
+
+    full_df = pd.get_dummies(full_df, columns=config.CATEGORICAL_FEATURES, drop_first=False)
 
     scaler = StandardScaler()
     full_df[config.NUMERICAL_FEATURES] = scaler.fit_transform(full_df[config.NUMERICAL_FEATURES])
@@ -35,4 +39,4 @@ def preprocess(df_train, df_predict):
     df_train_processed = df_train_processed.drop(['Season'], axis=1)
     df_predict_processed = df_predict_processed.drop(['Season'], axis=1)
     
-    return df_train_processed, df_predict_processed
+    return df_train_processed, df_predict_processed, df_predict_unscaled, scaler
