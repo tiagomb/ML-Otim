@@ -114,7 +114,7 @@ def predict_future_races(n_races_to_predict: int):
         predictions_df = final_predictions.sort_values('Predicted Points', ascending=False).reset_index()
         predictions_df['Position'] = range(1, len(predictions_df) + 1)
         predictions_df['Points'] = predictions_df['Position'].map(points_map).fillna(0)
-        predictions_df['Starting Grid'] = np.random.permutation(range(1, len(predictions_df) + 1))
+        predictions_df['Starting Grid'] = predictions_df['Position']
 
         current_season_unscaled_df, current_season_df = create_and_append_race_results(
             predictions_df,
@@ -129,7 +129,7 @@ def predict_future_races(n_races_to_predict: int):
     final_standings = current_season_unscaled_df.groupby('Driver ID').last().sort_values('Total Points', ascending=False).reset_index()
     final_standings['Final Position'] = range(1, len(final_standings) + 1)
 
-    print(f"\n--- Previsão do Campeonato Após {last_known_race_id + 1} Corridas ---")
+    print(f"\n--- Previsão do Campeonato Após {last_known_race_id} Corridas ---")
     print(final_standings[['Final Position', 'Driver', 'Team', 'Total Points']])
 
 if __name__ == '__main__':
