@@ -105,10 +105,8 @@ def predict_future_races(n_races_to_predict: int):
         with torch.no_grad():
             X_pred_tensor = torch.from_numpy(X_pred).float().to(device)
             output = model(X_pred_tensor).cpu().numpy().flatten()
-
-        noise = np.random.normal(0, 0.25, len(output))
         
-        sequence_predictions = pd.DataFrame({'Driver ID': driver_ids_per_sequence.values, 'Predicted Points': output+noise})
+        sequence_predictions = pd.DataFrame({'Driver ID': driver_ids_per_sequence.values, 'Predicted Points': output})
         final_predictions = sequence_predictions.groupby('Driver ID').last()
 
         predictions_df = final_predictions.sort_values('Predicted Points', ascending=False).reset_index()
@@ -134,4 +132,5 @@ def predict_future_races(n_races_to_predict: int):
 
 if __name__ == '__main__':
     N_RACES = 9
+
     predict_future_races(N_RACES)
