@@ -40,6 +40,10 @@ features = categorical_features + numeric_features
 
 # Processamento dos Dados para efetuar os Testes:
 # ---------------------------------------------------
+
+df_2024['Season'] = 2024
+df_2025['Season'] = 2025
+
 df_history = pd.concat([df_2024, df_2025], ignore_index=True)
 
 def clean_position(pos):
@@ -51,18 +55,31 @@ df_history['Position'] = df_history['Position'].apply(clean_position)
 df_history['Total Points'] = pd.to_numeric(df_history['Total Points'], errors='coerce').fillna(0)
 df_history['Points'] = pd.to_numeric(df_history['Points'], errors='coerce').fillna(0)
 
-tracks_in_order = df_history['Track'].unique()
-track_order_map = {track: i for i, track in enumerate(tracks_in_order)}
-df_history['Race_Order'] = df_history['Track'].map(track_order_map)
-df_history = df_history.sort_values(by=['Race_Order', 'Driver'])
+global_race_map = {}
+race_counter = 0
 
-active_drivers_df = df_history[df_history['Race_Order'] == df_history['Race_Order'].max()]
+for track in df_2024['Track'].unique():
+    global_race_map[(2024, track)] = race_counter
+    race_counter += 1
+
+for track in df_2025['Track'].unique():
+    global_race_map[(2025, track)] = race_counter
+    race_counter += 1
+
+df_history['Global_Race_Order'] = df_history.apply(
+    lambda row: global_race_map.get((row['Season'], row['Track']), -1), axis=1
+)
+
+df_history = df_history.sort_values(by=['Global_Race_Order', 'Driver'])
+
+active_drivers_df = df_history[df_history['Global_Race_Order'] == df_history['Global_Race_Order'].max()]
+
 active_drivers = active_drivers_df['Driver'].unique()
 teams_map = active_drivers_df.set_index('Driver')['Team'].to_dict()
 
 current_lags_state = {}
 for driver in active_drivers:
-    driver_history = df_history[df_history['Driver'] == driver].sort_values('Race_Order')
+    driver_history = df_history[df_history['Driver'] == driver].sort_values('Global_Race_Order')
     last_3_pos = driver_history['Position'].tail(3).values.tolist()
     if len(last_3_pos) < 3:
         last_3_pos = [21] * (3 - len(last_3_pos)) + last_3_pos
